@@ -1,0 +1,353 @@
+📘 Ansible Cheat Sheet (with Explanations)
+Command	Explanation
+ansible all -m ping	Test connectivity to all hosts in inventory
+ansible-playbook site.yml	Run a playbook named site.yml
+ansible -i inventory.ini web -m shell -a "uptime"	Run shell command uptime on web group
+ansible-galaxy init role_name	Create a new role structure
+ansible-vault encrypt file.yml	Encrypt sensitive files (e.g., secrets)
+ansible-vault decrypt file.yml	Decrypt file
+ansible-vault edit file.yml	Edit encrypted file
+ansible-doc -l	List all available modules
+ansible-playbook play.yml --check	Dry-run mode (no changes applied)
+ansible-playbook play.yml --diff	Show differences when files change
+👉 Inventory files (inventory.ini) define hosts and groups. Playbooks (.yml) define tasks.
+
+#======================================================================================================
+
+#📄 Template for Ansible Playbook
+
+
+- name: Example Playbook
+  hosts: webservers
+  become: true   # run with sudo
+  vars:
+    app_port: 8080
+
+  tasks:
+    - name: Ensure latest apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: present
+
+    - name: Start Nginx service
+      service:
+        name: nginx
+        state: started
+        enabled: true
+#👉 This template shows variables, tasks, and privilege escalation (become: true).
+
+#======================================================================================================
+
+#📝 Basic → Advanced Playbook Examples
+
+#1. Basic: Ping All Hosts
+
+- name: Ping all hosts
+  hosts: all
+  tasks:
+    - name: Ping
+      ping:
+
+#======================================================================================================
+
+#2. Intermediate: Deploy Web App
+
+
+- name: Deploy Flask App
+  hosts: webservers
+  become: true
+
+  tasks:
+    - name: Install Python and pip
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - python3
+        - python3-pip
+
+    - name: Copy app files
+      copy:
+        src: ./app/
+        dest: /opt/app/
+
+    - name: Install requirements
+      pip:
+        requirements: /opt/app/requirements.txt
+
+    - name: Run app with systemd
+      systemd:
+        name: flaskapp
+        state: started
+        enabled: true
+
+#======================================================================================================
+
+#3. Advanced: Multi‑Tier Deployment
+
+
+- name: Deploy Full Stack
+  hosts: all
+  become: true
+
+  roles:
+    - role: common
+    - role: web
+    - role: db
+
+# Example role: roles/web/tasks/main.yml
+- name: Install Nginx
+  apt:
+    name: nginx
+    state: present
+
+- name: Configure Nginx
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+  notify: restart nginx
+
+# Handlers: roles/web/handlers/main.yml
+- name: restart nginx
+  service:
+    name: nginx
+    state: restarted
+    enabled: true
+
+
+#👉 This shows roles, templates, and handlers — the building blocks of scalable Ansible projects.
+
+#✅ Summary
+#Cheat sheet → quick reference for everyday Ansible commands.
+
+#Template → reusable playbook structure with variables, tasks, and handlers.
+
+#Scripts → progression from simple ping → app deployment → multi‑tier role‑based architecture.
+
+#======================================================================================================
+
+#📘 Ansible Variables (vars)
+#Variables let you parameterize playbooks and roles, making them reusable and flexible.
+
+
+#Example: Using vars in a Playbook
+
+
+- name: Deploy Web App
+  hosts: webservers
+  become: true
+
+  vars:
+    app_port: 8080
+    app_dir: /opt/app
+
+  tasks:
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: present
+
+    - name: Configure Nginx
+      template:
+        src: nginx.conf.j2
+        dest: /etc/nginx/nginx.conf
+
+    - name: Start Nginx
+      service:
+        name: nginx
+        state: started
+        enabled: true
+
+
+#👉 Explanation:
+
+#vars: block defines app_port and app_dir.
+
+#These can be referenced in templates ({{ app_port }}) or tasks.
+
+#Keeps playbooks DRY and configurable.
+
+#======================================================================================================
+
+#🔐 Ansible Vault (Secrets Management)
+#Vault allows you to encrypt sensitive data (like passwords, API keys) inside playbooks or variable files.
+
+#Encrypt a File
+bash
+ansible-vault encrypt secrets.yml
+Decrypt a File
+bash
+ansible-vault decrypt secrets.yml
+Edit an Encrypted File
+bash
+ansible-vault edit secrets.yml
+Run Playbook with Vault
+bash
+ansible-playbook site.yml --ask-vault-pass
+
+#======================================================================================================
+
+#📝 Example: Vault + Vars in Playbook
+
+
+- name: Secure Deployment
+  hosts: dbservers
+  become: true
+
+  vars_files:
+    - secrets.yml   # Encrypted with Ansible Vault
+
+  tasks:
+    - name: Install PostgreSQL
+      apt:
+        name: postgresql
+        state: present
+
+    - name: Configure DB user
+      postgresql_user:
+        name: "{{ db_user }}"
+        password: "{{ db_password }}"
+        state: present
+
+#👉 Explanation:
+
+#vars_files: loads variables from secrets.yml.
+
+#db_user and db_password are encrypted with Vault.
+
+#Playbook references them securely without exposing plaintext.
+
+#✅ Summary
+
+#Vars → parameterize playbooks for flexibility.
+
+#Vault → encrypt secrets for secure automation.
+
+#Combined → secure, reusable, production‑grade playbooks.
+
+#======================================================================================================
+
+#📘 Role‑Based Variable Organization
+#In Ansible, variables can live in different places depending on scope:
+
+#defaults/main.yml → lowest precedence, safe defaults for a role.
+
+#vars/main.yml → higher precedence, role‑specific variables.
+
+#Inventory/group_vars/host_vars → environment‑specific overrides.
+
+#Playbook vars → highest precedence in a playbook run.
+
+
+#======================================================================================================
+
+#Example Role Structure
+Code
+roles/
+  web/
+    tasks/
+      main.yml
+    handlers/
+      main.yml
+    templates/
+      nginx.conf.j2
+    vars/
+      main.yml
+    defaults/
+      main.yml
+
+
+#defaults/main.yml
+
+# Default values (can be overridden)
+app_port: 8080
+app_dir: /opt/app
+
+#vars/main.yml
+
+# Role-specific values (higher precedence)
+nginx_package: nginx
+nginx_service: nginx
+
+#=====================================================================================================
+
+#tasks/main.yml
+---
+- name: Install Nginx
+  apt:
+    name: "{{ nginx_package }}"
+    state: present
+
+- name: Configure Nginx
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+  notify: restart nginx
+
+#=====================================================================================================
+
+#handlers/main.yml
+
+- name: restart nginx
+  service:
+    name: "{{ nginx_service }}"
+    state: restarted
+
+#👉 Explanation:
+
+#Defaults provide safe fallbacks.
+
+#Vars define role‑specific constants.
+
+#Tasks and handlers reference variables with {{ var_name }}.
+
+#Templates can interpolate variables (e.g., listen {{ app_port }}).
+
+#=====================================================================================================
+
+#🔐 Vault + Vars in Roles
+#You can store sensitive variables in Vault and load them into roles.
+
+#=====================================================================================================
+
+#Example: group_vars/prod/secrets.yml (encrypted with Vault)
+
+db_user: produser
+db_password: SuperSecret123
+
+#=====================================================================================================
+
+#Playbook referencing Vault
+
+yaml
+- name: Deploy Database
+  hosts: dbservers
+  become: true
+
+  vars_files:
+    - group_vars/prod/secrets.yml
+
+  roles:
+    - db
+
+#👉 Explanation:
+
+#Vault keeps secrets encrypted.
+
+#vars_files loads them securely.
+
+#Roles can consume them without exposing plaintext.
+
+#✅ Summary
+
+#Vars → parameterize playbooks and roles.
+
+#Defaults vs Vars → control precedence and flexibility.
+
+#Vault → secure secrets management.
+
+#Role structure → scalable, maintainable Ansible projects.

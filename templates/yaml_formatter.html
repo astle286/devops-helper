@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block content %}
+<a href="/" class="back-button">← Back to Dashboard</a>
+<h2>YAML / JSON Formatter</h2>
+
+<div class="formatter-form">
+  <textarea id="yamlInput" placeholder="Paste YAML or JSON here..." rows="12"></textarea>
+  
+  <div class="formatter-controls">
+    <button type="button" id="formatBtn" class="btn">Format</button>
+    <button type="button" id="parseBtn" class="btn">Parse</button>
+    <button type="button" id="convertBtn" class="btn">Convert</button>
+    <button type="button" id="uploadBtn" class="btn">Upload File</button>
+    <button type="button" id="clearBtn" class="btn">Clear</button>
+    <input type="file" id="fileInput" style="display:none;" />
+  </div>
+</div>
+
+<div class="snippet-card">
+  <h3>Output <span id="modeBadge" class="mode-badge"></span></h3>
+  <pre><code id="formattedOutput"></code></pre>
+  <button id="copyBtn">Copy</button>
+  <button id="downloadBtn">Download</button>
+</div>
+{% endblock %}
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const input = document.getElementById("yamlInput");
+  const output = document.getElementById("formattedOutput");
+  const modeBadge = document.getElementById("modeBadge");
+
+  async function callApi(endpoint) {
+    const formData = new FormData();
+    formData.append("input", input.value);
+    const res = await fetch(endpoint, { method: "POST", body: formData });
+    const data = await res.json();
+    if (data.output) {
+      output.textContent = data.output;
+      document.getElementById("modeBadge").textContent = data.mode ? `Detected: ${data.mode.toUpperCase()}` : "";
+    } else {
+      output.textContent = "Error: " + data.error;
+      document.getElementById("modeBadge").textContent = "";
+    }
+  }
+
+
+  document.getElementById("formatBtn").addEventListener("click", () => callApi("/api/format"));
+  document.getElementById("parseBtn").addEventListener("click", () => callApi("/api/parse"));
+  document.getElementById("convertBtn").addEventListener("click", () => callApi("/api/convert"));
+
+  document.getElementById("copyBtn").addEventListener("click", () => {
+    navigator.clipboard.writeText(output.innerText).then(() => {
+      const btn = document.getElementById("copyBtn");
+      btn.innerText = "Copied!";
+      setTimeout(() => btn.innerText = "Copy", 2000);
+    });
+  });
+
+  document.getElementById("downloadBtn").addEventListener("click", () => {
+    const blob = new Blob([output.innerText], { type: "text/plain" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "output.txt";
+    link.click();
+    URL.revokeObjectURL(link.href);
+  });
+
+  document.getElementById("uploadBtn").addEventListener("click", () => {
+    document.getElementById("fileInput").click();
+  });
+
+  document.getElementById("fileInput").addEventListener("change", e => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => input.value = reader.result;
+      reader.readAsText(file);
+    }
+  });
+});
+</script>

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<a href="/" class="back-button">← Back to Dashboard</a>
+<h2>Search Snippets</h2>
+
+<form method="GET" action="/search" class="search-form">
+  <input type="text" name="q" placeholder="Search snippets..." value="{{ query or '' }}" required>
+  <button type="submit" class="btn">Search</button>
+</form>
+
+{% if results %}
+  <h3>Results for "{{ query }}"</h3>
+  {% for snippet in results %}
+  <div class="snippet-card">
+    <h4>{{ snippet.label }}</h4>
+    <span class="badge">{{ snippet.lang.split('-')[1]|capitalize }}</span>
+    <pre><code class="{{ snippet.lang }}">{{ snippet.content }}</code></pre>
+    <button onclick="copySnippet(this)">Copy</button>
+  </div>
+  {% endfor %}
+{% else %}
+  {% if query %}
+    <p>No results found for "{{ query }}".</p>
+  {% endif %}
+{% endif %}
+{% endblock %}

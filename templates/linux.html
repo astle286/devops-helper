@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<a href="/" class="back-button">← Back to Dashboard</a>
+<h2>{{ page_title }}</h2>
+
+{% for snippet in snippets %}
+<div class="snippet-card">
+  <h3>{{ snippet.label }}</h3>
+  <span class="badge">{{ snippet.lang.split('-')[1]|capitalize }}</span>
+  <pre><code class="{{ snippet.lang }}">{{ snippet.content }}</code></pre>
+  <button onclick="copySnippet(this)">Copy</button>
+</div>
+{% endfor %}
+{% endblock %}

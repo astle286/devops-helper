@@ -1,0 +1,78 @@
+#🐳 Variant 1: Simple Service (ClusterIP)
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp-service
+spec:
+  selector:
+    app: myapp
+    # Match pods with label app=myapp
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+      # Expose port 5000 inside cluster
+  type: ClusterIP
+  # Default service type, internal only
+
+#👉 Use case: Internal communication between pods. Other services in the cluster can reach myapp-service:5000.
+
+#=============================================================================================================
+
+#🐳 Variant 2: NodePort Service
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp-nodeport
+spec:
+  selector:
+    app: myapp
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+      nodePort: 30007
+      # Expose on node port 30007
+  type: NodePort
+  # Makes service accessible externally via <NodeIP>:30007
+
+#👉 Use case: Quick external access for dev/test. Not ideal for production because ports are limited and not load‑balanced.
+
+#=============================================================================================================
+
+#🐳 Variant 3: Production‑Grade LoadBalancer Service
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp-loadbalancer
+spec:
+  selector:
+    app: myapp
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+      # Map external port 80 to container port 8000
+  type: LoadBalancer
+  # Provision cloud provider load balancer (AWS, GCP, Azure)
+
+
+#👉 Use case: Production‑grade external access.
+
+Cloud provider provisions a load balancer automatically.
+
+Maps external port 80 to container port 8000.
+
+Scales with replicas in Deployment.
+
+Often combined with Ingress for domain + TLS routing.
+
+✅ Summary
+ClusterIP → internal service, default type.
+
+NodePort → quick external access, dev/test only.
+
+LoadBalancer → production‑grade external access, integrates with cloud provider.

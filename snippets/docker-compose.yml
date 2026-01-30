@@ -1,0 +1,108 @@
+#🐳 Variant 1: Simple docker-compose.yml
+
+version: "3.9"
+# Compose file format version
+
+services:
+  app:
+    build: .
+    # Build image from Dockerfile in current directory
+    ports:
+      - "5000:5000"
+      # Map host port 5000 to container port 5000
+    volumes:
+      - .:/app
+      # Mount local code into container for live development
+#👉 Use case: Quick local development. Easy to run docker-compose up and see changes instantly.
+
+#---------------------------------------------------------------------------------------------------------------------------
+
+#🐳 Variant 2: Multi‑Service Compose (with DB)
+
+version: "3.9"
+
+services:
+  app:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@db:5432/mydb
+      # Pass connection string to app
+    depends_on:
+      - db
+      # Ensure DB starts before app
+
+  db:
+    image: postgres:15-alpine
+    # Lightweight Postgres image
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=mydb
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      # Persist database data
+
+volumes:
+  db_data:
+    # Named volume for Postgres persistence
+
+#👉 Use case: Adds a database service. Shows how services can depend on each other and share environment variables.
+
+
+#---------------------------------------------------------------------------------------------------------------------------
+
+#🐳 Variant 3: Production‑Grade Compose
+
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+      # Use a production‑grade Dockerfile (multi‑stage, Gunicorn, non‑root)
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@db:5432/mydb
+    depends_on:
+      - db
+    restart: always
+    # Auto‑restart on failure
+    deploy:
+      replicas: 3
+      # Scale app to 3 containers
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: "512M"
+        reservations:
+          cpus: "0.25"
+               # Ensure DB starts before app
+
+  db:
+    image: postgres:15-alpine
+    # Lightweight Postgres image
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=mydb
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      # Persist database data
+
+volumes:
+  db_data:
+    # Named volume for Postgres persistence
+
+#👉 Use case: Hardened production deployment.
+
+#Uses a dedicated Dockerfile.prod with Gunicorn and non‑root user.
+
+#Adds restart policies and resource limits.
+
+#Supports scaling replicas for load balancing.
+
+#Keeps database persistent with named volume.

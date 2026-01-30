@@ -1,0 +1,117 @@
+#🐳 Variant 1: Simple Pod
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp-pod
+  labels:
+    app: myapp
+spec:
+  containers:
+    - name: myapp
+      image: myapp:latest
+      ports:
+        - containerPort: 5000
+
+
+#👉 Explanation:
+
+#kind: Pod → the most basic unit in Kubernetes.
+
+Runs a single container (myapp).
+
+Exposes port 5000 inside the pod.
+
+Useful for quick testing, but not scalable (no replicas).
+
+#=====================================================================================================
+
+#🐳 Variant 2: Multi‑Container Pod
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: web-backend-pod
+  labels:
+    app: web-backend
+spec:
+  containers:
+    - name: frontend
+      image: myfrontend:latest
+      ports:
+        - containerPort: 3000
+    - name: backend
+      image: mybackend:latest
+      ports:
+        - containerPort: 5000
+
+
+#👉 Explanation:
+
+Runs two containers in one pod (frontend + backend).
+
+Containers share the same network namespace (can talk via localhost).
+
+Useful for tightly coupled services (e.g., sidecar pattern).
+
+#=====================================================================================================
+
+#🐳 Variant 3: Production‑Grade Pod
+
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: prod-pod
+  labels:
+    app: prodapp
+spec:
+  containers:
+    - name: prodapp
+      image: myapp:1.0.0
+      ports:
+        - containerPort: 8000
+      resources:
+        requests:
+          cpu: "250m"
+          memory: "256Mi"
+        limits:
+          cpu: "500m"
+          memory: "512Mi"
+      env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: db-secrets
+              key: database_url
+      livenessProbe:
+        httpGet:
+          path: /health
+          port: 8000
+        initialDelaySeconds: 10
+        periodSeconds: 30
+      readinessProbe:
+        httpGet:
+          path: /ready
+          port: 8000
+        initialDelaySeconds: 5
+        periodSeconds: 10
+
+#👉 Explanation:
+
+Uses versioned image (myapp:1.0.0) for reproducibility.
+
+Resource requests/limits → ensures fair scheduling and prevents resource hogging.
+
+Secrets → inject sensitive data securely via valueFrom.secretKeyRef.
+
+Probes → health checks for self‑healing and rolling updates.
+
+Production‑grade pod, but usually wrapped inside a Deployment for scaling.
+
+✅ Summary
+Simple Pod → single container, great for dev/test.
+
+Multi‑container Pod → tightly coupled services in one pod.
+
+Production‑grade Pod → resource limits, secrets, probes, versioning.

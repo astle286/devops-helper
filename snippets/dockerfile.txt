@@ -1,0 +1,100 @@
+#🐳 Variant 1: Simple Dockerfile
+
+FROM python:3.11-slim
+# Start from a lightweight Python 3.11 image
+
+WORKDIR /app
+# Set the working directory inside the container
+
+COPY requirements.txt .
+# Copy dependency list first (helps with caching)
+
+RUN pip install -r requirements.txt
+# Install Python dependencies
+
+COPY . .
+# Copy the rest of the application code
+
+CMD ["python", "app.py"]
+# Default command to run your app
+
+#👉 Use case: Quick development setup. Easy to understand, but not optimized for image size or production.
+
+#--------------------------------------------------------------------------------------------------------------------------------
+
+
+#🐳 Variant 2: Multi‑Stage Dockerfile
+
+# Stage 1: Build dependencies
+FROM python:3.11-slim AS builder
+# Use slim Python base image for smaller footprint
+
+WORKDIR /app
+# Set working directory
+
+COPY requirements.txt .
+# Copy only requirements first to leverage caching
+
+RUN pip install --user --no-cache-dir -r requirements.txt
+# Install dependencies in a temporary build layer
+
+# Stage 2: Runtime image
+FROM python:3.11-slim
+# Start fresh with a clean slim image
+
+WORKDIR /app
+# Set working directory again
+
+COPY --from=builder /root/.local /root/.local
+# Copy installed dependencies from builder stage
+
+ENV PATH=/root/.local/bin:$PATH
+# Ensure Python can find installed packages
+
+COPY . .
+# Copy application code
+
+CMD ["python", "app.py"]
+# Run the app
+
+#👉 Use case: Smaller, cleaner runtime image. Dependencies are built separately, reducing attack surface and improving caching.
+#--------------------------------------------------------------------------------------------------------------------------------
+
+
+    #🐳 Variant 3: Production‑Grade Dockerfile
+
+# Stage 1: Build dependencies
+
+FROM python:3.11-slim AS builder
+
+# Base image for building dependencies
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --user --no-cache-dir -r requirements.txt
+
+# Stage 2: Runtime image
+FROM python:3.11-slim
+
+# Create non-root user for security
+RUN useradd -m appuser
+
+WORKDIR /app
+COPY --from=builder /root/.local /root/.local
+ENV PATH=/root/.local/bin:$PATH
+
+COPY . .
+
+# Switch to non-root user
+USER appuser
+
+# Use Gunicorn for production-grade serving
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:8000", "app:app"]
+
+#👉 Use case: Hardened production deployment.
+
+#Runs as non‑root user for security.
+
+#Uses Gunicorn with multiple workers for better performance and scalability.
+
+#Keeps image slim and clean with multi‑stage build.

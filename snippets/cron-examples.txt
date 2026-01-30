@@ -1,0 +1,86 @@
+# Format: * * * * * command
+# ┬ ┬ ┬ ┬ ┬
+# │ │ │ │ └── Day of week (0-6)
+# │ │ │ └──── Month (1-12)
+# │ │ └────── Day of month (1-31)
+# │ └──────── Hour (0-23)
+# └────────── Minute (0-59)
+
+🕒 Cron Cheat Sheet
+
+Expression	Meaning
+* * * * *	Run every minute
+0 * * * *	Run at the start of every hour
+0 6 * * *	Run daily at 6:00 AM
+0 0 * * 0	Run weekly at midnight on Sunday
+0 0 1 * *	Run monthly at midnight on the 1st
+*/15 * * * *	Run every 15 minutes
+0 9-17 * * 1-5	Run hourly between 9 AM–5 PM, Monday–Friday
+0 0 1 1 *	Run yearly at midnight on January 1st
+
+======================================================================================================
+
+👉 Format:
+
+Code
+minute hour day_of_month month day_of_week command
+
+=======================================================================================================
+
+📄 Template for Cron + .sh Script
+
+bash
+#!/bin/bash
+# Example cron job script template
+
+set -e  # exit on error
+set -x  # debug mode (optional)
+
+# Variables
+LOG_FILE="/var/log/myjob.log"
+
+# Main logic
+echo "$(date): Job started" >> "$LOG_FILE"
+
+# Example task
+python3 /app/app.py >> "$LOG_FILE" 2>&1
+
+echo "$(date): Job finished" >> "$LOG_FILE"
+
+👉 Save this as job.sh, make it executable (chmod +x job.sh), then schedule with cron.
+
+
+======================================================================================================
+
+📝 Basic → Advanced Cron Examples
+
+1. Basic: Run Backup Daily
+
+cron
+0 2 * * * /home/user/backup.sh
+# Run backup script every day at 2 AM
+
+======================================================================================================
+
+2. Intermediate: Clean Logs Weekly
+
+cron
+0 0 * * 0 find /var/log/myapp -name "*.log" -mtime +7 -delete
+# Delete logs older than 7 days every Sunday at midnight
+
+======================================================================================================
+
+3. Advanced: Deploy App + Restart Service
+
+cron
+0 3 * * 1 cd /home/user/myapp && git pull && docker-compose down && docker-compose up -d
+# Every Monday at 3 AM: update code, rebuild containers, restart app
+
+======================================================================================================
+
+✅ Summary
+Cheat sheet → quick reference for cron syntax.
+
+Template → reusable .sh script with logging.
+
+Scripts → show progression from simple backups → log cleanup → automated deployments.

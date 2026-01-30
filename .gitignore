@@ -1,0 +1,65 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.egg-info/
+*.egg
+*.log
+
+# Virtual environments
+venv/
+env/
+.venv/
+ENV/
+
+# Flask instance folder
+instance/
+*.db
+*.sqlite3
+
+# Unit test / coverage reports
+.coverage
+htmlcov/
+.tox/
+.nox/
+.cache/
+pytest_cache/
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
+
+# Node / frontend (if using Prism.js or npm)
+node_modules/
+dist/
+build/
+
+# Docker
+*.pid
+*.seed
+*.pid.lock
+docker-compose.override.yml
+
+# Editor / OS files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# GitHub Actions
+# (keep workflows, ignore local runner artifacts)
+.github/workflows/*.bak
+.github/workflows/*.tmp
+
+# Logs
+*.log
+logs/
+
+# Docker build artifacts
+*.tar
+*.img
+*.pid
+*.lock
+layer-cache/
+docker-compose.override.yml

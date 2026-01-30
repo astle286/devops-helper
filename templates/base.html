@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>DevOps Helper</title>
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <!-- Prism.js CSS (with id for theme switching) -->
+  <link id="prismTheme" href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-okaidia.min.css" rel="stylesheet" />
+</head>
+<body>
+  <!-- Theme toggle button in top-right corner -->
+  <button id="theme-toggle" class="theme-toggle">🌙</button>  
+
+  <nav>
+    <a href="/">Home</a>
+    <a href="/search">Search</a>
+    <a href="/upload-snippet">Upload</a>
+    <a href="/yaml-formatter">Formatter</a>
+  </nav>
+  
+  <hr>
+  {% block content %}{% endblock %}
+
+
+  <!-- Prism.js JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js"></script>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const toggle = document.getElementById("theme-toggle");
+      const body = document.body;
+      const prismTheme = document.getElementById("prismTheme");
+
+      // Load saved theme from localStorage
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme) {
+        body.classList.add(savedTheme);
+        toggle.textContent = savedTheme === "dark-mode" ? "🌙" : "🌞";
+        prismTheme.href = savedTheme === "dark-mode"
+          ? "https://cdn.jsdelivr.net/npm/prismjs/themes/prism-okaidia.min.css"
+          : "https://cdn.jsdelivr.net/npm/prismjs/themes/prism.min.css";
+      } else {
+        body.classList.add("dark-mode"); // default
+        toggle.textContent = "🌙";
+        prismTheme.href = "https://cdn.jsdelivr.net/npm/prismjs/themes/prism-okaidia.min.css";
+      }
+
+      // Toggle handler
+      toggle.addEventListener("click", () => {
+        if (body.classList.contains("dark-mode")) {
+          body.classList.remove("dark-mode");
+          body.classList.add("light-mode");
+          toggle.textContent = "🌞";
+          localStorage.setItem("theme", "light-mode");
+          prismTheme.href = "https://cdn.jsdelivr.net/npm/prismjs/themes/prism.min.css";
+        } else {
+          body.classList.remove("light-mode");
+          body.classList.add("dark-mode");
+          toggle.textContent = "🌙";
+          localStorage.setItem("theme", "dark-mode");
+          prismTheme.href = "https://cdn.jsdelivr.net/npm/prismjs/themes/prism-okaidia.min.css";
+        }
+        Prism.highlightAll(); // re-highlight with new theme
+      });
+    });
+  </script>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

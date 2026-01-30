@@ -1,0 +1,236 @@
+#🐳 Variant 1: Simple Deployment
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-deployment
+  labels:
+    app: myapp
+spec:
+  replicas: 1
+  # Run a single replica (pod)
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+        - name: myapp
+          image: myapp:latest
+          ports:
+            - containerPort: 5000
+
+#👉 Use case: Quick dev/test deployment. One replica, single container, minimal config.
+
+#=============================================================================================================
+
+#🐳 Variant 2: Multi‑Container Deployment
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-deployment
+  labels:
+    app: web
+spec:
+  replicas: 2
+  # Run two replicas for load balancing
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+        - name: frontend
+          image: myfrontend:latest
+          ports:
+            - containerPort: 3000
+        - name: backend
+          image: mybackend:latest
+          ports:
+            - containerPort: 5000
+#👉 Use case: Deploy multiple containers in the same pod (frontend + backend). Useful for tightly coupled services.
+
+#=============================================================================================================
+
+#🐳 Variant 3: Production‑Grade Deployment
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prod-deployment
+  labels:
+    app: prodapp
+spec:
+  replicas: 3
+  # Scale to 3 replicas
+  selector:
+    matchLabels:
+      app: prodapp
+  template:
+    metadata:
+      labels:
+        app: prodapp
+    spec:
+      containers:
+        - name: prodapp
+          image: myapp:1.0.0
+          ports:
+            - containerPort: 8000
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: db-secrets
+                  key: database_url
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+
+#👉 Use case: Hardened production deployment.
+
+Replicas → scaling for availability.
+
+Resources → CPU/memory requests & limits.
+
+Secrets → secure environment variables.
+
+Probes → health checks for self‑healing and rolling updates.
+
+Versioned image → ensures reproducibility.
+
+✅ Summary
+Simple → one replica, single container, great for dev.
+
+Multi‑container → multiple services in one pod.
+
+Production‑grade → scaling, resource limits, secrets, probes, versioning.
+
+Astle, do you want me to also add a Service + Ingress example alongside these deployments? That way your snippets cover not just pods but also how to expose them internally and externally in Kubernetes.
+
+sure
+Perfect, Astle — let’s extend your Kubernetes snippets with Service + Ingress examples so they’re truly production‑ready. This way your page covers not just deployments but also how to expose them internally and externally.
+
+#=============================================================================================================
+
+#🐳 Kubernetes Service + Ingress Examples
+
+#1. Simple Service (ClusterIP)
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp-service
+spec:
+  selector:
+    app: myapp
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+  type: ClusterIP
+👉 Explanation:
+
+ClusterIP exposes the app inside the cluster only.
+
+Other pods can reach myapp-service:5000.
+
+Great for internal microservice communication.
+
+#=============================================================================================================
+
+#2. NodePort Service
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp-nodeport
+spec:
+  selector:
+    app: myapp
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+      nodePort: 30007
+  type: NodePort
+
+
+#👉 Explanation:
+
+Exposes the app on every node’s IP at port 30007.
+
+Useful for quick external access without a load balancer.
+
+Not ideal for production (limited flexibility).
+
+#=============================================================================================================
+
+#3. Production‑Grade Ingress
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: myapp-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - host: myapp.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: myapp-service
+                port:
+                  number: 5000
+  tls:
+    - hosts:
+        - myapp.example.com
+      secretName: myapp-tls
+
+👉 Explanation:
+
+Routes external traffic from myapp.example.com to the service.
+
+Uses Ingress Controller (e.g., NGINX) for routing.
+
+TLS termination with myapp-tls secret for HTTPS.
+
+#Production‑grade: secure, scalable, domain‑based routing.
+
+✅ Summary
+
+ClusterIP → internal service, default type.
+
+NodePort → quick external access, dev/test only.
+
+Ingress → production‑grade external access, domain + TLS.
