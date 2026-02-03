@@ -11,6 +11,7 @@ docker pull ghcr.io/astle286/devops-helper:latest
 
 echo ">>> Restarting containers..."
 
+docker-compose down
 docker-compose up -d
 
 echo ">>> Deployment complete! Running latest"
