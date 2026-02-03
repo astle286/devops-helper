@@ -2,7 +2,7 @@
 set -e
 
 echo ">>> Updating project files..."
-
+cd ~/devops-helper
 echo ">>> Logging in to GHCR..."
 echo $GHCR_PAT | docker login ghcr.io -u YOUR_GITHUB_USERNAME --password-stdin
 
