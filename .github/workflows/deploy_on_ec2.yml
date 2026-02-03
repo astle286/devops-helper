@@ -47,5 +47,4 @@ jobs:
             cd ~/devops-helper
             git fetch --all
             git reset --hard origin/main
-            cd ~
             ./deploy.sh
