@@ -6,7 +6,7 @@ on:
 
 permissions:
   contents: read
-  packages: write   # required to push to GHCR
+  packages: write   
 
 jobs:
   build-and-push:

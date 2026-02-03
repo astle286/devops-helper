@@ -38,7 +38,17 @@ def load_snippet_with_lang(filename):
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    cards = []
+    for fname in os.listdir(SNIPPET_DIR):
+        title = fname.replace("_", " ").replace(".txt", "").title()
+        content, lang, label = load_snippet_with_lang(fname)
+        cards.append({
+            "title": title,
+            "filename": fname,
+            "lang": lang,
+            "label": label
+        })
+    return render_template("index.html", snippets=cards)
 
 @app.route("/dockerfile")
 def dockerfile():
@@ -92,8 +102,6 @@ def yaml_formatter():
     # just renders the page
     return render_template("yaml_formatter.html")
 
-
-# --- NEW BACKEND ROUTES ---
 
 def detect_mode(raw_input: str):
     try:
@@ -167,13 +175,26 @@ def api_convert():
 def upload_snippet():
     message = None
     if request.method == "POST":
-        filename = secure_filename(request.form["filename"])  # sanitize filename
-        content = request.form["content"]
+        # Get title and content from form
+        title = request.form.get("snippetTitle")
+        content = request.form.get("snippetText")
+
+        # Sanitize filename from title
+        filename = secure_filename(f"{title.replace(' ', '_').lower()}.txt")
         path = os.path.join(SNIPPET_DIR, filename)
+
+        # Save snippet to file
         with open(path, "w") as f:
             f.write(content)
-        message = f"Snippet {filename} uploaded successfully!"
+
+        message = f"Snippet '{title}' uploaded successfully!"
     return render_template("upload_snippet.html", message=message)
+
+@app.route("/view/<filename>")
+def view_snippet(filename):
+    content, lang, label = load_snippet_with_lang(filename)
+    snippet = {"content": content, "lang": lang, "label": label, "title": filename}
+    return render_template("snippet_view.html", snippet=snippet)
 
 
 @app.route("/search", methods=["GET", "POST"])

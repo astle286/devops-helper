@@ -385,4 +385,27 @@ body.light-mode .mode-badge {
   border: 1px solid #ccc;
 }
 
+/* Smooth fade for page content */
+.page-transition {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
 
+.page-transition.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.snippet-content {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none; /* prevents accidental clicks while hidden */
+}
+
+.snippet-content.active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}

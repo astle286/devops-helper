@@ -1,44 +1,10 @@
 {% extends "base.html" %}
+<div id="content" class="page-transition active">
 {% block content %}
 <h2>DevOps Helper Dashboard</h2>
 
 <div class="dashboard-grid">
-  <div class="card">
-    <h3>📦 Dockerfile</h3>
-    <p>Common Dockerfile snippets</p>
-    <a href="/dockerfile" class="btn">View</a>
-  </div>
-
-  <div class="card">
-    <h3>⚙️ Docker Compose</h3>
-    <p>Compose templates for services</p>
-    <a href="/docker-compose" class="btn">View</a>
-  </div>
-
-  <div class="card">
-    <h3>☸️ Kubernetes</h3>
-    <p>Deployment and service manifests</p>
-    <a href="/kubernetes" class="btn">View</a>
-  </div>
-
-  <div class="card">
-    <h3>📜 Ansible</h3>
-    <p>Playbooks and inventory examples</p>
-    <a href="/ansible" class="btn">View</a>
-  </div>
-
-  <div class="card">
-    <h3>🐧 Linux Scripts</h3>
-    <p>Useful shell scripts</p>
-    <a href="/linux" class="btn">View</a>
-  </div>
-
-  <div class="card">
-    <h3>⏰ Cron Jobs</h3>
-    <p>Scheduled task examples</p>
-    <a href="/cron" class="btn">View</a>
-  </div>
-
+  <!-- Static cards -->
   <div class="card">
     <h3>🔍 Search</h3>
     <p>Find snippets quickly</p>
@@ -46,7 +12,7 @@
   </div>
 
   <div class="card">
-    <h3>⬆️ Upload</h3>
+    <h3>⬆️ Add</h3>
     <p>Add new snippets</p>
     <a href="/upload-snippet" class="btn">Go</a>
   </div>
@@ -56,5 +22,14 @@
     <p>YAML ↔ JSON converter</p>
     <a href="/yaml-formatter" class="btn">Go</a>
   </div>
+
+  <!-- Dynamic snippet cards -->
+  {% for snippet in snippets %}
+  <div class="card">
+    <h3>🆕 {{ snippet.title }}</h3>
+    <p>{{ snippet.label }} snippet</p>
+    <a href="/view/{{ snippet.filename }}" class="btn">View</a>
+  </div>
+  {% endfor %}
 </div>
 {% endblock %}

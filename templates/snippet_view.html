@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<a href="/" class="back-button">← Back to Dashboard</a>
+<h2>{{ snippet.title }}</h2>
+<span class="badge">{{ snippet.label }}</span>
+
+<pre><code class="{{ snippet.lang }}">{{ snippet.content }}</code></pre>
+{% endblock %}

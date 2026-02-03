@@ -3,11 +3,18 @@
 <a href="/" class="back-button">← Back to Dashboard</a>
 <h2>Upload Snippet</h2>
 
-<form method="POST" enctype="multipart/form-data">
-  <label for="file">Choose snippet file:</label>
-  <input type="file" name="file" id="file" required>
-  <button type="submit" class="btn">Upload</button>
+<form method="POST" action="/upload-snippet">
+  <label for="snippetTitle">Snippet Title:</label><br>
+  <input type="text" id="snippetTitle" name="snippetTitle" placeholder="e.g. My Kubernetes Deployment" required><br><br>
+
+  <label for="snippetText">Paste your snippet:</label><br>
+  <textarea id="snippetText" name="snippetText" rows="12" cols="80"
+            placeholder="Paste YAML, JSON, Dockerfile, etc. here..." required></textarea><br><br>
+
+  <button type="submit" class="btn">Save Snippet</button>
 </form>
+
+<hr>
 
 {% if message %}
   <p>{{ message }}</p>
