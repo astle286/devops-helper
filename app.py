@@ -4,9 +4,26 @@ import yaml
 import os
 import json
 import redis
+from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
+import time
 
 app = Flask(__name__)
 SNIPPET_DIR = "snippets"
+
+# Counters for HTTP status codes
+http_requests_total = Counter(
+    'http_requests_total', 'Total HTTP requests',
+    ['method', 'endpoint', 'status']
+)
+
+# Histogram for request latency
+http_request_latency_seconds = Histogram(
+    'http_request_latency_seconds',
+    'Request latency in seconds',
+    ['method', 'endpoint'],
+    buckets=(0.1, 0.3, 0.5, 1, 2, 5)
+)
+
 
 r = redis.Redis(host="redis", port=6379, decode_responses=True)
 
@@ -233,6 +250,22 @@ def page_not_found(e):
 @app.errorhandler(500)
 def internal_error(e):
     return render_template("500.html"), 500
+
+@app.before_request
+def start_timer():
+    request.start_time = time.time()
+
+@app.after_request
+def record_metrics(response):
+    if not request.path.startswith(('/static', '/favicon.ico')):
+        latency = time.time() - request.start_time
+        http_request_latency_seconds.labels(request.method, request.path).observe(latency)
+        http_requests_total.labels(request.method, request.path, response.status_code).inc()
+    return response
+
+@app.route("/metrics")
+def metrics():
+    return generate_latest(), 200, {'Content-Type': CONTENT_TYPE_LATEST}
 
 
 if __name__ == "__main__":
