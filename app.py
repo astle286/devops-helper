@@ -6,6 +6,7 @@ import json
 import redis
 from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
 import time
+import hcl2
 
 app = Flask(__name__)
 SNIPPET_DIR = "snippets"
@@ -47,6 +48,7 @@ def load_snippet_with_lang(filename):
         ".md": ("language-markdown", "Markdown"),
         ".cfg": ("language-none", "Plain Text"),
         ".conf": ("language-none", "Plain Text"),
+        ".tf": ("language-hcl", "Terraform HCL"),
     }
     lang, label = lang_map.get(ext, ("language-none", "Plain Text"))
     return content, lang, label
