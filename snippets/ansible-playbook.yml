@@ -351,3 +351,49 @@ yaml
 #Vault → secure secrets management.
 
 #Role structure → scalable, maintainable Ansible projects.
+
+MY EXAMPLE:
+- name: deploy application
+  hosts: appservers
+  remote_user: ubuntu
+  become: yes
+  tasks:
+    - name: copy application files
+      ansible.builtin.script: ./prod.sh
+
+- name: restart application
+  hosts: appservers
+  remote_user: ubuntu
+  become: yes
+  tasks:
+    - name: restart application using docker-compose
+      ansible.builtin.script: ./update.sh
+
+- name: install nginx
+  hosts: nginx
+  remote_user: ubuntu
+  become: yes
+  tasks:
+    - name: install nginx using script
+      ansible.builtin.script: ./nginx.sh
+
+- name: deploy nginx configuration
+  hosts: nginx
+  remote_user: ubuntu
+  become: yes
+  tasks:
+    - name: copy nginx configuration file
+      ansible.builtin.copy:
+        src: ./loadbalancer.conf
+        dest: /etc/nginx/conf.d/loadbalancer.conf
+        owner: root
+        group: root
+        mode: '0644'
+
+- name: restart nginx
+  hosts: nginx
+  remote_user: ubuntu
+  become: yes
+  tasks:
+    - name: restart nginx service
+      ansible.builtin.script: ./restart_nginx.sh

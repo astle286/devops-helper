@@ -120,3 +120,14 @@ echo "Deployment complete!"
 #Template → reusable .sh structure with variables, functions, and safety flags.
 
 #Scripts → show progression from simple backups → log management → automated deployments.
+
+MY EXAMPLES:
+!#bin/bash
+apt update -y && apt upgrade -y
+apt install git -y
+apt install docker.io -y
+apt install docker-compose -y
+git clone https://github.com/astle286/devops-helper.git
+cd devops-helper
+docker-compose up -d
+
