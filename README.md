@@ -1,3 +1,9 @@
+---
+🙏 Thank you to everyone who has downloaded and used DevOps Helper.  
+![GitHub Downloads](https://img.shields.io/badge/downloads-67-blue?style=flat-square)
+---
+
+
 # 🚀 DevOps Helper
 
 A modular Flask dashboard for DevOps engineers — search, upload, format, and manage infrastructure snippets with style.
